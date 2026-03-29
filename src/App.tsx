@@ -14,7 +14,7 @@ import {
 import { motion, AnimatePresence, PanInfo } from 'motion/react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { ReactFlow, Background, Controls, MarkerType, MiniMap, useNodesState, useEdgesState, Handle, Position } from '@xyflow/react';
+import { ReactFlow, Background, Controls, MarkerType, MiniMap, useNodesState, useEdgesState, Handle, Position, BackgroundVariant } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 // ==========================================
@@ -145,41 +145,53 @@ const Gotcha = ({ text }) => (
   </div>
 );
 
-const SyntaxBox = ({ code, highlights }) => (
-  <div className="flex flex-col lg:flex-row gap-6 h-full min-h-0">
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="flex-1 rounded-2xl overflow-auto text-sm sm:text-base border-2 border-slate-800 shadow-2xl relative group"
-    >
-      <div className="absolute top-0 right-0 px-3 py-1 bg-slate-800 text-slate-400 text-xs rounded-bl-lg opacity-0 group-hover:opacity-100 transition-opacity z-10">C++</div>
-      <SyntaxHighlighter
-        language="cpp"
-        style={atomDark}
-        customStyle={{ margin: 0, padding: '1.5rem', background: '#0d1117', minHeight: '100%' }}
-        wrapLongLines={true}
+const SyntaxBox = ({ code, highlights }) => {
+  const colorClasses: Record<string, string> = {
+    blue: "border-blue-500 bg-blue-50 dark:bg-blue-900/40 text-slate-800 dark:text-slate-200",
+    emerald: "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/40 text-slate-800 dark:text-slate-200",
+    amber: "border-amber-500 bg-amber-50 dark:bg-amber-900/40 text-slate-800 dark:text-slate-200",
+    rose: "border-rose-500 bg-rose-50 dark:bg-rose-900/40 text-slate-800 dark:text-slate-200",
+    indigo: "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/40 text-slate-800 dark:text-slate-200",
+    slate: "border-slate-500 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200",
+  };
+
+  return (
+    <div className="flex flex-col lg:flex-row gap-6 h-full min-h-0">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex-1 rounded-2xl overflow-auto text-sm sm:text-base border-2 border-slate-200 dark:border-slate-700 shadow-xl relative group"
       >
-        {code}
-      </SyntaxHighlighter>
-    </motion.div>
-    {highlights && (
-      <div className="flex-1 flex flex-col gap-3 overflow-auto pr-2">
-        {highlights.map((h, i) => (
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: i * 0.1 }}
-            key={i} 
-            className={`p-4 rounded-xl border-l-4 border-${h.color}-500 bg-${h.color}-50 dark:bg-${h.color}-900/20 text-sm sm:text-base text-slate-800 dark:text-slate-200 shadow-sm`}
-          >
-            {h.text}
-          </motion.div>
-        ))}
-      </div>
-    )}
-  </div>
-);
+        <div className="absolute top-0 right-0 px-3 py-1 bg-slate-800 text-slate-400 text-xs rounded-bl-lg opacity-0 group-hover:opacity-100 transition-opacity z-10">C++</div>
+        <SyntaxHighlighter
+          language="cpp"
+          style={atomDark}
+          customStyle={{ margin: 0, padding: '1.5rem', background: 'transparent', minHeight: '100%' }}
+          wrapLongLines={true}
+          className="!bg-slate-50 dark:!bg-[#0d1117] text-slate-800 dark:text-slate-200"
+        >
+          {code}
+        </SyntaxHighlighter>
+      </motion.div>
+      {highlights && (
+        <div className="flex-1 flex flex-col gap-3 overflow-auto pr-2">
+          {highlights.map((h: any, i: number) => (
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              key={i} 
+              className={`p-4 rounded-xl border-l-4 shadow-sm ${colorClasses[h.color] || colorClasses.blue}`}
+            >
+              {h.text}
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const MathBox = ({ formula, humanReadable, variables, explanation, relevance, context, useCases, connections }) => (
   <div className="flex flex-col items-center justify-start p-8 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-2 border-slate-200 dark:border-slate-800 h-full shadow-inner overflow-y-auto">
@@ -260,28 +272,32 @@ const MathBox = ({ formula, humanReadable, variables, explanation, relevance, co
 
 // Custom node component for styled state boxes
 const StateNode = ({ data }: any) => (
-  <div
-    className={`
-      px-5 py-4 rounded-xl shadow-lg border-2 
-      font-semibold text-sm text-center min-w-[180px] max-w-[250px]
-      ${data.colorClasses}
-    `}
-  >
-    <Handle type="target" position={Position.Top} className="!bg-transparent !border-0 !w-4 !h-4" />
-    <div className="text-base">{data.label}</div>
-    {data.subtitle && (
-      <div className="text-xs font-normal mt-2 opacity-90 leading-tight">
-        {data.subtitle}
-      </div>
-    )}
-    {data.extra && (
-      <div className="mt-3 text-xs bg-black/20 p-2 rounded text-left font-normal leading-tight">
-        {data.extra}
-      </div>
-    )}
-    <Handle type="source" position={Position.Bottom} className="!bg-transparent !border-0 !w-4 !h-4" />
-    <Handle type="source" position={Position.Right} id="right" className="!bg-transparent !border-0 !w-4 !h-4" />
-    <Handle type="target" position={Position.Left} id="left" className="!bg-transparent !border-0 !w-4 !h-4" />
+  <div className={`
+    px-5 py-3 rounded-md border-2 font-bold text-sm text-center min-w-[140px]
+    ${data.isSuper
+      ? 'bg-blue-100/50 dark:bg-blue-900/30 border-blue-400 dark:border-blue-600 text-blue-800 dark:text-blue-200'
+      : 'bg-white dark:bg-slate-800 border-slate-600 dark:border-slate-400 text-slate-900 dark:text-slate-100'
+    }
+    shadow-md dark:shadow-slate-900/50
+  `}>
+    <Handle type="target" position={Position.Top} id="top"
+      className="!w-2 !h-2 !bg-slate-400 dark:!bg-slate-500 !border-none" />
+    <Handle type="target" position={Position.Left} id="left"
+      className="!w-2 !h-2 !bg-slate-400 dark:!bg-slate-500 !border-none" />
+    <Handle type="source" position={Position.Bottom} id="bottom"
+      className="!w-2 !h-2 !bg-slate-400 dark:!bg-slate-500 !border-none" />
+    <Handle type="source" position={Position.Right} id="right"
+      className="!w-2 !h-2 !bg-slate-400 dark:!bg-slate-500 !border-none" />
+    <Handle type="source" position={Position.Top} id="top-source"
+      className="!w-2 !h-2 !bg-slate-400 dark:!bg-slate-500 !border-none" />
+    <Handle type="source" position={Position.Left} id="left-source"
+      className="!w-2 !h-2 !bg-slate-400 dark:!bg-slate-500 !border-none" />
+    <Handle type="target" position={Position.Bottom} id="bottom-target"
+      className="!w-2 !h-2 !bg-slate-400 dark:!bg-slate-500 !border-none" />
+    <Handle type="target" position={Position.Right} id="right-target"
+      className="!w-2 !h-2 !bg-slate-400 dark:!bg-slate-500 !border-none" />
+
+    {data.label}
   </div>
 );
 
@@ -289,6 +305,7 @@ const nodeTypes = { stateNode: StateNode };
 
 const StateDiagramS10 = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const isDark = document.documentElement.classList.contains('dark');
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
@@ -298,190 +315,228 @@ const StateDiagramS10 = () => {
 
   const [nodes, setNodes, onNodesChange] = useNodesState([
     {
-      id: 'init',
-      type: 'stateNode',
-      position: { x: 300, y: 0 },
-      data: {
-        label: 'Initialise',
-        subtitle: 'Setup sensors, motors, and variables.',
-        colorClasses: 'bg-slate-700 text-white border-slate-500',
+      id: 'superstate-travelling',
+      type: 'group',
+      position: { x: 50, y: 140 },
+      style: {
+        width: 320,
+        height: 380,
+        backgroundColor: 'rgba(191, 219, 254, 0.3)',
+        border: '2px solid #93c5fd',
+        borderRadius: '8px',
+        padding: '10px',
       },
+      data: { label: '' },
     },
     {
-      id: 'not-turning',
-      type: 'stateNode',
-      position: { x: 300, y: 150 },
-      data: {
-        label: 'Not Turning',
-        subtitle: 'Default state. Moving straight, tracking walls.',
-        colorClasses: 'bg-blue-600 text-white border-blue-400',
+      id: 'superstate-label',
+      type: 'default',
+      position: { x: 80, y: 495 },
+      data: { label: 'Travelling forward' },
+      style: {
+        background: 'transparent',
+        border: 'none',
+        color: '#2563eb',
+        fontWeight: 'bold',
+        fontSize: '14px',
+        fontStyle: 'italic',
       },
+      draggable: false,
+      selectable: false,
     },
     {
-      id: 'about-to-turn',
-      type: 'stateNode',
-      position: { x: 300, y: 350 },
-      data: {
-        label: 'About to Turn',
-        subtitle: 'Gap detected. Preparing to turn at cell center.',
-        colorClasses: 'bg-indigo-600 text-white border-indigo-400',
+      id: 'stopped-region',
+      type: 'group',
+      position: { x: 380, y: 400 },
+      style: {
+        width: 250,
+        height: 150,
+        backgroundColor: 'rgba(241, 245, 249, 0.5)',
+        border: '2px dashed #94a3b8',
+        borderRadius: '50%',
       },
+      data: { label: '' },
     },
     {
-      id: 'about-to-stop',
+      id: 'initialise',
       type: 'stateNode',
-      position: { x: 300, y: 550 },
-      data: {
-        label: 'About to Stop',
-        subtitle: 'Dead end ahead. Decelerating to stop at center.',
-        colorClasses: 'bg-rose-600 text-white border-rose-400',
-      },
+      position: { x: 50, y: 20 },
+      data: { label: 'Initialise' },
     },
     {
-      id: 'stopped',
+      id: 'notTurning',
       type: 'stateNode',
-      position: { x: 300, y: 750 },
-      data: {
-        label: 'Stopped',
-        subtitle: 'Robot is stationary. Ready for next command.',
-        colorClasses: 'bg-slate-800 text-white border-slate-600 rounded-full',
-      },
+      position: { x: 100, y: 170 },
+      data: { label: 'Not Turning' },
+    },
+    {
+      id: 'aboutToTurn',
+      type: 'stateNode',
+      position: { x: 100, y: 310 },
+      data: { label: 'About to turn' },
+    },
+    {
+      id: 'aboutToStop',
+      type: 'stateNode',
+      position: { x: 100, y: 440 },
+      data: { label: 'About to stop' },
     },
     {
       id: 'turning',
       type: 'stateNode',
-      position: { x: 650, y: 250 },
-      data: {
-        label: 'Turning',
-        subtitle: 'Executing 90° or 180° pivot turn. Motors moving in opposite directions.',
-        extra: 'Robot ignores wall sensors while turning to prevent false triggers.',
-        colorClasses: 'bg-emerald-600 text-white border-emerald-400',
+      position: { x: 460, y: 290 },
+      data: { label: 'Turning' },
+    },
+    {
+      id: 'stopped',
+      type: 'stateNode',
+      position: { x: 430, y: 450 },
+      data: { label: 'Stopped' },
+    },
+  ]);
+
+  const edgeDefaults = {
+    style: { stroke: isDark ? '#94a3b8' : '#475569', strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: isDark ? '#94a3b8' : '#475569' },
+    labelStyle: { fill: isDark ? '#e2e8f0' : '#1e293b', fontWeight: 600, fontSize: 11 },
+    labelBgStyle: {
+      fill: isDark ? '#1e293b' : '#ffffff',
+      fillOpacity: 0.9,
+      stroke: isDark ? '#475569' : '#cbd5e1',
+      rx: 4, ry: 4,
+    },
+  };
+
+  const [edges, setEdges, onEdgesChange] = useEdgesState([
+    {
+      id: 'e-init-notTurning',
+      source: 'initialise',
+      target: 'notTurning',
+      sourceHandle: 'bottom',
+      targetHandle: 'top',
+      label: 'Initialisation complete',
+      type: 'smoothstep',
+      animated: true,
+      ...edgeDefaults,
+    },
+    {
+      id: 'e-notTurning-aboutToTurn',
+      source: 'notTurning',
+      target: 'aboutToTurn',
+      sourceHandle: 'bottom',
+      targetHandle: 'top',
+      label: 'Side wall gone',
+      type: 'smoothstep',
+      animated: true,
+      ...edgeDefaults,
+    },
+    {
+      id: 'e-aboutToTurn-turning',
+      source: 'aboutToTurn',
+      target: 'turning',
+      sourceHandle: 'right',
+      targetHandle: 'left',
+      label: 'Front wall present',
+      type: 'smoothstep',
+      animated: true,
+      ...edgeDefaults,
+    },
+    {
+      id: 'e-turning-notTurning',
+      source: 'turning',
+      target: 'notTurning',
+      sourceHandle: 'top-source',
+      targetHandle: 'right-target',
+      label: 'Turn complete',
+      type: 'smoothstep',
+      animated: true,
+      ...edgeDefaults,
+    },
+    {
+      id: 'e-turning-aboutToStop',
+      source: 'turning',
+      target: 'aboutToStop',
+      sourceHandle: 'bottom',
+      targetHandle: 'right-target',
+      label: 'In square centre',
+      type: 'smoothstep',
+      animated: true,
+      ...edgeDefaults,
+    },
+    {
+      id: 'e-aboutToStop-stopped',
+      source: 'aboutToStop',
+      target: 'stopped',
+      sourceHandle: 'right',
+      targetHandle: 'left',
+      label: 'In square centre',
+      type: 'smoothstep',
+      animated: true,
+      ...edgeDefaults,
+    },
+    {
+      id: 'e-stopped-self',
+      source: 'stopped',
+      target: 'stopped',
+      sourceHandle: 'right',
+      targetHandle: 'bottom-target',
+      label: 'U-turn',
+      type: 'smoothstep',
+      animated: true,
+      ...edgeDefaults,
+      style: {
+        ...edgeDefaults.style,
+        strokeDasharray: '5,5',
       },
     },
   ]);
 
-  const [edges, setEdges, onEdgesChange] = useEdgesState([
-    {
-      id: 'e-init-not-turning',
-      source: 'init',
-      target: 'not-turning',
-      label: 'Init complete',
-      animated: true,
-      markerEnd: { type: MarkerType.ArrowClosed },
-      style: { stroke: '#94a3b8', strokeWidth: 2 },
-      labelStyle: { fill: '#64748b', fontWeight: 600, fontSize: 12 },
-      labelBgStyle: { fill: 'var(--bg-card)', fillOpacity: 0.8 },
-    },
-    {
-      id: 'e-not-turning-about-to-turn',
-      source: 'not-turning',
-      target: 'about-to-turn',
-      label: 'Side wall disappears',
-      animated: true,
-      markerEnd: { type: MarkerType.ArrowClosed },
-      style: { stroke: '#60a5fa', strokeWidth: 2 },
-      labelStyle: { fill: '#3b82f6', fontWeight: 600, fontSize: 12 },
-      labelBgStyle: { fill: 'var(--bg-card)', fillOpacity: 0.8 },
-    },
-    {
-      id: 'e-not-turning-about-to-stop',
-      source: 'not-turning',
-      target: 'about-to-stop',
-      label: 'Front wall detected',
-      animated: true,
-      type: 'smoothstep',
-      sourceHandle: 'left',
-      targetHandle: 'left',
-      markerEnd: { type: MarkerType.ArrowClosed },
-      style: { stroke: '#fb7185', strokeWidth: 2 },
-      labelStyle: { fill: '#e11d48', fontWeight: 600, fontSize: 12 },
-      labelBgStyle: { fill: 'var(--bg-card)', fillOpacity: 0.8 },
-    },
-    {
-      id: 'e-about-to-turn-about-to-stop',
-      source: 'about-to-turn',
-      target: 'about-to-stop',
-      label: 'Front wall detected',
-      animated: true,
-      markerEnd: { type: MarkerType.ArrowClosed },
-      style: { stroke: '#fb7185', strokeWidth: 2 },
-      labelStyle: { fill: '#e11d48', fontWeight: 600, fontSize: 12 },
-      labelBgStyle: { fill: 'var(--bg-card)', fillOpacity: 0.8 },
-    },
-    {
-      id: 'e-about-to-stop-stopped',
-      source: 'about-to-stop',
-      target: 'stopped',
-      label: 'Reached square centre',
-      animated: true,
-      markerEnd: { type: MarkerType.ArrowClosed },
-      style: { stroke: '#94a3b8', strokeWidth: 2 },
-      labelStyle: { fill: '#64748b', fontWeight: 600, fontSize: 12 },
-      labelBgStyle: { fill: 'var(--bg-card)', fillOpacity: 0.8 },
-    },
-    {
-      id: 'e-about-to-turn-turning',
-      source: 'about-to-turn',
-      target: 'turning',
-      label: 'In square centre',
-      animated: true,
-      type: 'smoothstep',
-      markerEnd: { type: MarkerType.ArrowClosed },
-      style: { stroke: '#34d399', strokeWidth: 2 },
-      labelStyle: { fill: '#059669', fontWeight: 600, fontSize: 12 },
-      labelBgStyle: { fill: 'var(--bg-card)', fillOpacity: 0.8 },
-    },
-    {
-      id: 'e-turning-not-turning',
-      source: 'turning',
-      target: 'not-turning',
-      label: 'Turn complete',
-      animated: true,
-      type: 'smoothstep',
-      markerEnd: { type: MarkerType.ArrowClosed },
-      style: { stroke: '#34d399', strokeWidth: 2 },
-      labelStyle: { fill: '#059669', fontWeight: 600, fontSize: 12 },
-      labelBgStyle: { fill: 'var(--bg-card)', fillOpacity: 0.8 },
-    },
-  ]);
-
   return (
-    <div className="flex flex-col h-full overflow-auto p-4 gap-4 text-slate-800 dark:text-slate-200">
-      <div className="text-center mb-2 shrink-0">
-        <h3 className="text-xl font-bold text-indigo-600 dark:text-indigo-400">Micromouse Navigation State Machine</h3>
-        <p className="text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mt-2">
-          This diagram illustrates the core decision loop. The robot defaults to moving forward, 
-          anticipates turns or stops based on sensor data, and executes those actions precisely 
-          when it reaches the center of a maze cell.
-        </p>
-      </div>
-      <div className="w-full h-[600px] bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-2 border-slate-200 dark:border-slate-800 overflow-hidden relative">
-        <ReactFlow 
-          nodes={nodes} 
-          edges={edges} 
+    <div className="flex flex-col lg:flex-row gap-6 h-full text-slate-800 dark:text-slate-200">
+      <div className="flex-1 h-[550px] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 relative"
+           onPointerDown={(e) => e.stopPropagation()}
+      >
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           nodeTypes={nodeTypes}
-          fitView 
+          fitView
           fitViewOptions={{ padding: 0.2 }}
+          proOptions={{ hideAttribution: true }}
+          panOnDrag
+          zoomOnScroll
           minZoom={0.5}
-          maxZoom={1.5}
-          attributionPosition="bottom-right"
+          maxZoom={2}
         >
-          <Background color="#94a3b8" gap={16} />
-          <Controls className="!bg-white dark:!bg-slate-800 !border-slate-200 dark:!border-slate-700 !shadow-lg" />
-          <MiniMap 
-            nodeColor={(n) => {
-              if (n.id === 'init' || n.id === 'stopped') return '#475569';
-              if (n.id === 'not-turning') return '#2563eb';
-              if (n.id === 'about-to-turn') return '#4f46e5';
-              if (n.id === 'about-to-stop') return '#e11d48';
-              if (n.id === 'turning') return '#059669';
-              return '#94a3b8';
-            }}
-            className="!bg-white dark:!bg-slate-900 !border-slate-200 dark:!border-slate-800"
+          <Background
+            variant={BackgroundVariant.Dots}
+            gap={20}
+            size={1}
+            color={isDark ? '#334155' : '#e2e8f0'}
+            className={isDark ? '!bg-slate-900' : '!bg-slate-50'}
+          />
+          <Controls
+            className={isDark
+              ? '!bg-slate-800 !border-slate-600 !rounded-lg [&>button]:!bg-slate-700 [&>button]:!border-slate-600 [&>button>svg]:!fill-slate-200 [&>button]:hover:!bg-slate-600 [&>button]:!rounded'
+              : '!bg-white !border-slate-200 !rounded-lg [&>button]:!bg-white [&>button]:!border-slate-200 [&>button>svg]:!fill-slate-600 [&>button]:hover:!bg-slate-50 [&>button]:!rounded'
+            }
           />
         </ReactFlow>
+      </div>
+
+      <div className="w-full lg:w-64 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 self-start shadow-sm">
+        <h3 className="text-xl font-bold text-blue-700 dark:text-blue-400 mb-4">States</h3>
+        <ul className="space-y-3">
+          {['Initialise', 'Travelling Forward', 'Not Turning', 'About to turn',
+            'About to stop', 'Stopped', 'Turning'].map((state) => (
+            <li key={state} className="flex items-center gap-3 text-slate-800 dark:text-slate-200 font-medium text-sm">
+              <span className="w-3 h-3 rounded-full bg-blue-500 dark:bg-blue-400 shadow-sm" />
+              {state}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
@@ -603,9 +658,9 @@ const MASTER_SLIDES: any[] = [
   // SECTION 1: PROJECT OVERVIEW
   { title: "The Micro-Mouse Problem", subtitle: "What Is It?", icon: Target, layout: "bento",
     data:[
-      { title: "The Mission", desc: "An autonomous robot that navigates and solves an 8×8 grid maze without human intervention.", icon: Flag, color: "rose" },
-      { title: "The Environment", desc: "An 8×8 grid of square cells, each potentially having walls on any of its four sides.", icon: Map, color: "blue" },
-      { title: "The Objectives", desc: "Explore, map the walls, find the target (centre), then perform a high-speed optimal run.", icon: Zap, color: "emerald" },
+      { title: "The Mission", desc: "An autonomous robot that navigates and solves an 8×8 grid maze without human intervention.", icon: Flag, color: "rose", micromouseContext: "The robot must be completely self-contained. No external processing or power is allowed during the run." },
+      { title: "The Environment", desc: "An 8×8 grid of square cells, each potentially having walls on any of its four sides.", icon: Map, color: "blue", micromouseContext: "The maze walls are standard dimensions, allowing the robot to rely on precise physical measurements for navigation." },
+      { title: "The Objectives", desc: "Explore, map the walls, find the target (centre), then perform a high-speed optimal run.", icon: Zap, color: "emerald", micromouseContext: "The final score is based on the fastest run from start to center, not the exploration time." },
     ],
     analogy: "Like a blindfolded person in a dark room feeling the walls to find the door, then running straight to it once they know the path."
   },
@@ -646,8 +701,8 @@ const MASTER_SLIDES: any[] = [
   // SECTION 3: STATE MACHINE
   { title: "Why a State Machine?", subtitle: "The core architecture", icon: Settings, layout: "bento",
     data:[
-      { title: "The FSM Loop", desc: "At a fixed time period: Read sensors -> Determine next STATE -> Execute actions for that STATE -> Repeat." },
-      { title: "Timing Mechanism", desc: "Intervals controlled by a precise clock tick signal (interrupt-driven), NOT by blocking wait() subroutines." }
+      { title: "The FSM Loop", desc: "At a fixed time period: Read sensors -> Determine next STATE -> Execute actions for that STATE -> Repeat.", micromouseContext: "In the micromouse, this loop is driven by the main while(1) loop, while the actual physical actions (motor stepping) are driven by a hardware timer interrupt." },
+      { title: "Timing Mechanism", desc: "Intervals controlled by a precise clock tick signal (interrupt-driven), NOT by blocking wait() subroutines.", micromouseContext: "Using wait() or delay() functions is strictly forbidden in the main loop, as it would cause the robot to miss critical sensor readings and crash." }
     ],
     analogy: "Like a traffic light. It checks timers/sensors (events), changes to a specific color (state), and cars react (action)."
   },
@@ -792,10 +847,10 @@ const MASTER_SLIDES: any[] = [
   // SECTION 7: MEMORY
   { title: "Data Storage & Memory", subtitle: "Variables Required", icon: Battery, layout: "bento",
     data:[
-      { title: "Position", desc: "X_POS (0-7), Y_POS (0-7). Updated at cell centres." },
-      { title: "Orientation", desc: "NORTH, SOUTH, EAST, WEST. Updated after turns." },
-      { title: "Wall Map [8][8]", desc: "Stores wall presence. 4 bits per cell (N,S,E,W)." },
-      { title: "Lee Map [8][8]", desc: "Stores flood fill values. Max value 63 fits in 6 bits." }
+      { title: "Position", desc: "X_POS (0-7), Y_POS (0-7). Updated at cell centres.", micromouseContext: "The robot must track its exact logical position to know when it has reached the target (usually cell 3,3 or 4,4 depending on the grid)." },
+      { title: "Orientation", desc: "NORTH, SOUTH, EAST, WEST. Updated after turns.", micromouseContext: "Orientation is crucial because sensor readings (Left, Front, Right) must be translated into absolute map directions (N, S, E, W) to update the Wall Map correctly." },
+      { title: "Wall Map [8][8]", desc: "Stores wall presence. 4 bits per cell (N,S,E,W).", micromouseContext: "Since the maze is 8x8, the wall map takes exactly 64 bytes of memory, which easily fits in the limited RAM of the mbed microcontroller." },
+      { title: "Lee Map [8][8]", desc: "Stores flood fill values. Max value 63 fits in 6 bits.", micromouseContext: "The Lee Map is recalculated frequently during exploration. Keeping it small ensures the recalculation loop is fast enough to run between cell movements." }
     ],
     gotcha: "When recording a wall (e.g., North wall on cell 3,4), you MUST also record the corresponding South wall on adjacent cell (3,5)!"
   },
@@ -846,9 +901,9 @@ const MASTER_SLIDES: any[] = [
   // SECTION 8: NOISE & CONFIDENCE
   { title: "Sensor Noise & Interference", subtitle: "Hardware Solutions", icon: ShieldAlert, layout: "bento",
     data:[
-      { title: "Ambient Light Blindness", desc: "IS471F modulates IR beam at 38kHz. Ignores DC ambient sunlight/fluorescent lights." },
-      { title: "Mutual Crosstalk", desc: "Use Time Division Multiplexing (TDM) — fire adjacent sensors sequentially, never simultaneously." },
-      { title: "Mechanical Bounce", desc: "Use hardware RC Low-Pass Filter (10kΩ + 100nF) to smooth voltage spikes on switches." }
+      { title: "Ambient Light Blindness", desc: "IS471F modulates IR beam at 38kHz. Ignores DC ambient sunlight/fluorescent lights.", micromouseContext: "Without modulation, the robot would be blinded by the sun or overhead lights, causing it to see 'walls' that aren't there." },
+      { title: "Mutual Crosstalk", desc: "Use Time Division Multiplexing (TDM) — fire adjacent sensors sequentially, never simultaneously.", micromouseContext: "If the left and front-left sensors fire at the same time, the IR light from one can bounce into the receiver of the other." },
+      { title: "Mechanical Bounce", desc: "Use hardware RC Low-Pass Filter (10kΩ + 100nF) to smooth voltage spikes on switches.", micromouseContext: "Essential for the start button. Without debouncing, a single press might be read as multiple rapid presses, skipping states." }
     ],
     analogy: "Modulation is like recognizing your friend's specific voice pattern in a loud, noisy room of random chatter."
   },
@@ -876,9 +931,9 @@ Result: 1 (Wall present)`,
   },
   { title: "Nyquist Spatial Sampling", subtitle: "How often to read sensors", icon: Target, layout: "bento",
     data:[
-      { title: "The Theorem", desc: "You must sample at least TWICE per feature width to reliably detect it." },
-      { title: "Oversampling Danger", desc: "Reading too fast: a narrow 2mm crack in a wall looks like a wide gap, triggering a false turn." },
-      { title: "Undersampling Danger", desc: "Reading too slow: a legitimate side-turn gap is skipped over and missed entirely." }
+      { title: "The Theorem", desc: "You must sample at least TWICE per feature width to reliably detect it.", micromouseContext: "In micromouse, the 'feature' is the width of a wall or the width of a gap between walls." },
+      { title: "Oversampling Danger", desc: "Reading too fast: a narrow 2mm crack in a wall looks like a wide gap, triggering a false turn.", micromouseContext: "If the robot samples every 1mm, a small imperfection in the maze wall might be interpreted as a full 168mm corridor opening." },
+      { title: "Undersampling Danger", desc: "Reading too slow: a legitimate side-turn gap is skipped over and missed entirely.", micromouseContext: "If the robot samples every 100mm, it might completely miss a 168mm gap if the samples happen to fall just before and just after the opening." }
     ],
     analogy: "If a camera takes 1 picture per minute, a fast car zooming past might not appear in any photos (undersampling)."
   },
@@ -1033,9 +1088,9 @@ Result: 1 (Wall present)`,
   // SECTION 11: KINEMATICS
   { title: "Wheelbase & Steering", subtitle: "Differential Drive", icon: Crosshair, layout: "bento",
     data:[
-      { title: "Wheelbase", desc: "Distance between wheels. Determines pivot radius." },
-      { title: "Pivot Turn", desc: "One motor forward, one reverse. Robot spins on its centre." },
-      { title: "Swept Path", desc: "The circle traced by the robot's corners during a turn. Must be < corridor width." }
+      { title: "Wheelbase", desc: "Distance between wheels. Determines pivot radius.", micromouseContext: "A wider wheelbase makes the robot more stable but requires more space to turn. A narrower wheelbase allows tighter turns but is prone to tipping." },
+      { title: "Pivot Turn", desc: "One motor forward, one reverse. Robot spins on its centre.", micromouseContext: "This is the primary turning method for a micromouse, as it allows the robot to turn 90 or 180 degrees without moving forward or backward." },
+      { title: "Swept Path", desc: "The circle traced by the robot's corners during a turn. Must be < corridor width.", micromouseContext: "If the swept path is larger than 168mm (the standard corridor width), the robot will physically jam against the walls during a turn." }
     ],
     analogy: "Like a tank: to turn, it moves one track faster than the other."
   },
@@ -1068,10 +1123,10 @@ Result: 1 (Wall present)`,
   // SECTION 12: MBED API
   { title: "mbed C++ API", subtitle: "Key Classes", icon: Code, layout: "bento",
     data:[
-      { title: "Ticker", desc: "attach(&func, seconds) -> Fires interrupt precisely. Free CPU." },
-      { title: "Timer", desc: "read_ms(), reset() -> Software stopwatch. Requires polling loop." },
-      { title: "InterruptIn", desc: "rise(&func) -> Hardware pin triggers ISR on voltage edge." },
-      { title: "PwmOut", desc: "Hardware PWM. Great for simple speed, but cannot track exact step counts." }
+      { title: "Ticker", desc: "attach(&func, seconds) -> Fires interrupt precisely. Free CPU.", micromouseContext: "Used to create the 'Master Tick' that drives the motors and triggers sensor readings at exact intervals." },
+      { title: "Timer", desc: "read_ms(), reset() -> Software stopwatch. Requires polling loop.", micromouseContext: "Useful for measuring the time taken to solve the maze or for debouncing buttons, but not for precise motor control." },
+      { title: "InterruptIn", desc: "rise(&func) -> Hardware pin triggers ISR on voltage edge.", micromouseContext: "Used for the start button or to detect encoder pulses if using DC motors instead of steppers." },
+      { title: "PwmOut", desc: "Hardware PWM. Great for simple speed, but cannot track exact step counts.", micromouseContext: "Generally avoided for the main drive motors in a stepper-based micromouse, as exact step counting is required for odometry." }
     ],
     analogy: "Ticker is an alarm clock. Timer is a stopwatch. InterruptIn is a doorbell."
   },
@@ -1113,10 +1168,10 @@ int main() {
   // SECTION 13: EXAM PREP
   { title: "Exam Tips & Gotchas", subtitle: "Highest yield revision points", icon: Award, layout: "bento",
     data:[
-      { title: "Calculations", desc: "Master: Motor stepping rate, Nyquist 'm', LM7805 heat, and Battery runtime.", color: "blue" },
-      { title: "Drawings", desc: "Memorize: Top-Level State Diagram (Slide 10) and Sensor Bit Layout.", color: "indigo" },
-      { title: "Common Trap 1", desc: "Forgetting the factor of 2 in motor speed (2 toggles = 1 step).", color: "rose" },
-      { title: "Common Trap 2", desc: "Leaving DS2003 COM pin floating (destroys chip).", color: "rose" }
+      { title: "Calculations", desc: "Master: Motor stepping rate, Nyquist 'm', LM7805 heat, and Battery runtime.", color: "blue", micromouseContext: "These 4 calculations are almost guaranteed to appear in some form on the exam." },
+      { title: "Drawings", desc: "Memorize: Top-Level State Diagram (Slide 10) and Sensor Bit Layout.", color: "indigo", micromouseContext: "You will likely be asked to draw or complete a state diagram for a specific behavior." },
+      { title: "Common Trap 1", desc: "Forgetting the factor of 2 in motor speed (2 toggles = 1 step).", color: "rose", micromouseContext: "A stepper motor requires a high-to-low AND a low-to-high transition to complete one full step." },
+      { title: "Common Trap 2", desc: "Leaving DS2003 COM pin floating (destroys chip).", color: "rose", micromouseContext: "Without the COM pin connected to the motor supply voltage, the back-EMF diodes have nowhere to dump the voltage spikes." }
     ],
     gotcha: "Always check your units! mm vs cm vs m can ruin a calculation."
   },
@@ -1701,21 +1756,21 @@ function MicroMouseRevisionDeckInner() {
       />
 
       {/* Dynamic Progress Bar */}
-      <div className="fixed bottom-0 left-0 h-2 w-full bg-slate-200 dark:bg-slate-800 z-50 overflow-hidden">
+      <div className="fixed bottom-0 left-0 h-2 w-full bg-slate-200 dark:bg-slate-800 z-50">
         <motion.div 
           className="h-full relative"
           style={{
-            background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #10b981, #3b82f6)',
+            background: 'linear-gradient(90deg, #3b82f6, #06b6d4, #14b8a6, #3b82f6)',
             backgroundSize: '300% 100%',
-            boxShadow: '0 0 15px 2px rgba(99, 102, 241, 0.8), 0 0 5px 1px rgba(59, 130, 246, 0.8)'
+            boxShadow: '0 -2px 10px rgba(59, 130, 246, 0.5), 0 0 5px rgba(6, 182, 212, 0.5)'
           }}
           animate={{ 
             width: `${(currentSlide / (totalSlides - 1)) * 100}%`,
-            backgroundPosition: ['0% 0%', '100% 0%']
+            backgroundPosition: ['0% 0%', '-300% 0%']
           }}
           transition={{ 
             width: { duration: 0.5, ease: "circOut" },
-            backgroundPosition: { duration: 3, repeat: Infinity, ease: "linear" }
+            backgroundPosition: { duration: 8, repeat: Infinity, ease: "linear" }
           }}
         >
           <div className="absolute top-0 right-0 bottom-0 w-20 bg-gradient-to-r from-transparent to-white/50 blur-[2px]" />
@@ -1723,54 +1778,56 @@ function MicroMouseRevisionDeckInner() {
       </div>
 
       {/* Main Container */}
-      <div className="flex-1 flex flex-col p-2 sm:p-4 pb-8 max-w-6xl mx-auto w-full h-full relative">
+      <div className="flex-1 flex flex-col w-full h-full relative">
         
-        {/* Header */}
-        <header className="flex items-center justify-between bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 p-3 rounded-2xl shadow-sm mb-4 shrink-0 z-10">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setIsNavOpen(true)}
-              className="p-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-800/50 transition-colors"
-              aria-label="Open Navigation"
-            >
-              <Menu size={20} />
-            </button>
-            <div className="hidden sm:block p-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg">
-              <SlideIcon size={20} />
-            </div>
-            <div>
-              <h1 className="font-bold text-sm sm:text-base leading-tight">{slide.title}</h1>
-              {slide.subtitle && <h2 className="text-[10px] sm:text-xs text-slate-500 font-medium">{slide.subtitle}</h2>}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
-              {currentSlide + 1} / {totalSlides}
-            </span>
-            <div className="flex gap-1">
+        {/* Header Container */}
+        <div className="w-full max-w-6xl mx-auto p-2 sm:p-4 pb-0 shrink-0 z-10">
+          <header className="flex items-center justify-between bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 p-3 rounded-2xl shadow-sm mb-4">
+            <div className="flex items-center gap-3">
               <button 
-                onClick={prevSlide} 
-                disabled={currentSlide === 0} 
-                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors"
-                aria-label="Previous Slide"
+                onClick={() => setIsNavOpen(true)}
+                className="p-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-800/50 transition-colors"
+                aria-label="Open Navigation"
               >
-                <ChevronLeft size={20}/>
+                <Menu size={20} />
               </button>
-              <button 
-                onClick={nextSlide} 
-                disabled={currentSlide === totalSlides - 1} 
-                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors"
-                aria-label="Next Slide"
-              >
-                <ChevronRight size={20}/>
-              </button>
+              <div className="hidden sm:block p-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                <SlideIcon size={20} />
+              </div>
+              <div>
+                <h1 className="font-bold text-sm sm:text-base leading-tight">{slide.title}</h1>
+                {slide.subtitle && <h2 className="text-[10px] sm:text-xs text-slate-500 font-medium">{slide.subtitle}</h2>}
+              </div>
             </div>
-          </div>
-        </header>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
+                {currentSlide + 1} / {totalSlides}
+              </span>
+              <div className="flex gap-1">
+                <button 
+                  onClick={prevSlide} 
+                  disabled={currentSlide === 0} 
+                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors"
+                  aria-label="Previous Slide"
+                >
+                  <ChevronLeft size={20}/>
+                </button>
+                <button 
+                  onClick={nextSlide} 
+                  disabled={currentSlide === totalSlides - 1} 
+                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors"
+                  aria-label="Next Slide"
+                >
+                  <ChevronRight size={20}/>
+                </button>
+              </div>
+            </div>
+          </header>
+        </div>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-hidden flex flex-col relative">
+        <main className="flex-1 overflow-hidden flex flex-col relative w-full">
           <AnimatePresence initial={false} custom={direction}>
             <motion.div 
               key={currentSlide}
@@ -1780,15 +1837,17 @@ function MicroMouseRevisionDeckInner() {
               animate="center"
               exit="exit"
               transition={{ type: "tween", duration: 0.4, ease: "easeInOut" }}
-              className="flex-1 flex flex-col w-full h-full overflow-y-auto overflow-x-hidden"
+              className="absolute inset-0 flex flex-col w-full h-full overflow-y-auto overflow-x-hidden"
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.2}
               onDragEnd={(e, info) => {
-                if (info.offset.x > 100 && currentSlide > 0) prevSlide();
-                if (info.offset.x < -100 && currentSlide < totalSlides - 1) nextSlide();
+                const threshold = window.innerWidth * 0.75;
+                if (info.offset.x > threshold && currentSlide > 0) prevSlide();
+                else if (info.offset.x < -threshold && currentSlide < totalSlides - 1) nextSlide();
               }}
             >
+              <div className="flex-1 flex flex-col w-full max-w-6xl mx-auto p-2 sm:p-4 pb-8">
               
               {/* Template Renderers */}
               {slide.layout === "bento" && Array.isArray(slide.data) && (
@@ -1893,7 +1952,7 @@ function MicroMouseRevisionDeckInner() {
                 {slide.analogy && <Analogy text={slide.analogy} />}
                 {slide.gotcha && <Gotcha text={slide.gotcha} />}
               </div>
-
+              </div>
             </motion.div>
           </AnimatePresence>
         </main>
