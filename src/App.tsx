@@ -666,18 +666,18 @@ const MASTER_SLIDES: any[] = [
   },
   { title: "Three Program Stages", subtitle: "Incremental Build Strategy", icon: Layers, layout: "bento",
     data:[
-      { title: "Stage 1: Tunnel Run", desc: "Robot drives forward through a straight corridor. Tests motor control and basic sensor reading. No turns.", color: "slate" },
-      { title: "Stage 2: Hand-on-Wall", desc: "Left/Right wall following. Tests turning logic and state transitions. Does NOT build a map.", color: "blue" },
-      { title: "Stage 3: Maze Mapping", desc: "Maps the entire maze using an exploration algorithm, stores walls, calculates optimal path, and executes speed run.", color: "emerald" },
-      { title: "Shared Code", desc: "All stages share motor drivers, sensor filtering, and state definitions to reduce debugging complexity.", color: "indigo", icon: GitMerge }
+      { title: "Stage 1: Tunnel Run", desc: "Robot drives forward through a straight corridor. Tests motor control and basic sensor reading. No turns.", color: "slate" , micromouseContext: "This is the first milestone in the micromouse project, ensuring the basic hardware (motors, sensors) and low-level software (PWM, ADC) are functioning correctly before adding complex logic." },
+      { title: "Stage 2: Hand-on-Wall", desc: "Left/Right wall following. Tests turning logic and state transitions. Does NOT build a map.", color: "blue" , micromouseContext: "This stage proves the robot can make decisions based on sensor input and execute turns, which is the foundation for the final maze-solving algorithm." },
+      { title: "Stage 3: Maze Mapping", desc: "Maps the entire maze using an exploration algorithm, stores walls, calculates optimal path, and executes speed run.", color: "emerald" , micromouseContext: "The ultimate goal of the micromouse competition. The robot must autonomously explore the unknown maze, find the center, and then compute the fastest route back or forth." },
+      { title: "Shared Code", desc: "All stages share motor drivers, sensor filtering, and state definitions to reduce debugging complexity.", color: "indigo", icon: GitMerge , micromouseContext: "In a micromouse project, modular code is essential. The motor control and sensor reading functions written in Stage 1 are reused directly in Stages 2 and 3." }
     ],
     analogy: "Learning to crawl (Stage 1), then walk by holding onto furniture (Stage 2), then finally running freely (Stage 3)."
   },
   { title: "Top-Level Solution", subtitle: "Three Runtime Phases", icon: RotateCcw, layout: "flow",
     data:[
-      { step: "1. Initialise", desc: "Set up MCU hardware, clear map arrays, state = IDLE, position = (0,0)." },
-      { step: "2. Map Maze", desc: "Explore using Left-Hand Wall / Lee's Algorithm. Record walls into memory at each cell." },
-      { step: "3. Speed Run", desc: "Navigate start-to-target via shortest path. Uses higher speed since path is known." }
+      { step: "1. Initialise", desc: "Set up MCU hardware, clear map arrays, state = IDLE, position = (0,0)." , micromouseContext: "The micromouse must start from a known state. The rules state the robot starts in a corner cell facing North." },
+      { step: "2. Map Maze", desc: "Explore using Left-Hand Wall / Lee's Algorithm. Record walls into memory at each cell." , micromouseContext: "The robot uses its sensors to detect walls and updates its internal 8x8 array representation of the physical maze." },
+      { step: "3. Speed Run", desc: "Navigate start-to-target via shortest path. Uses higher speed since path is known." , micromouseContext: "Once the center is found and the optimal path is calculated, the micromouse ignores exploration rules and takes the shortest, fastest path, often cutting corners diagonally." }
     ],
     analogy: "Planning a road trip: Check the car (Init), drive around to find the best route (Map), then take the highway (Speed Run)."
   },
@@ -692,8 +692,8 @@ const MASTER_SLIDES: any[] = [
   },
   { title: "Behavioural Chart vs Flowchart", subtitle: "Critical Distinction", icon: GitMerge, layout: "comparison",
     data: {
-      left: { title: "Behavioural (WHAT)", desc: "Natural language. E.g. 'Is there a wall on the left?' -> 'Turn left'. Audience: General.", color: "emerald" },
-      right: { title: "Flowchart (HOW)", desc: "Code level. E.g. 'State == Turning?' -> 'L1, L2 == 0?'. Audience: Programmers.", color: "blue" }
+      left: { title: "Behavioural (WHAT)", desc: "Natural language. E.g. 'Is there a wall on the left?' -> 'Turn left'. Audience: General.", color: "emerald" , micromouseContext: "Useful for explaining the micromouse's high-level strategy (e.g., 'explore all unvisited cells') to non-technical judges or team members." },
+      right: { title: "Flowchart (HOW)", desc: "Code level. E.g. 'State == Turning?' -> 'L1, L2 == 0?'. Audience: Programmers.", color: "blue" , micromouseContext: "Essential for the actual programming of the microcontroller, detailing the exact sequence of register reads, variable updates, and motor commands." }
     },
     gotcha: "Exam questions may ask you to draw one or the other. Do not mix up the abstraction levels!"
   },
@@ -708,27 +708,27 @@ const MASTER_SLIDES: any[] = [
   },
   { title: "States: Maze-Solving Task", subtitle: "High-Level Task States", icon: MapPin, layout: "flow",
     data:[
-      { step: "Mapping", desc: "Exploring and recording walls." },
-      { step: "Back to Start", desc: "Returning to origin after mapping." },
-      { step: "Speed Run", desc: "Fastest path to target." },
-      { step: "Complete", desc: "Target reached, motors stopped." }
+      { step: "Mapping", desc: "Exploring and recording walls." , micromouseContext: "The robot moves cell by cell, reading its left, front, and right sensors to detect walls and updating its internal map." },
+      { step: "Back to Start", desc: "Returning to origin after mapping." , micromouseContext: "After finding the center, the micromouse must return to the start cell to begin its official timed speed run." },
+      { step: "Speed Run", desc: "Fastest path to target." , micromouseContext: "The robot uses the calculated optimal path to travel from the start to the center as fast as possible, often using diagonal movements." },
+      { step: "Complete", desc: "Target reached, motors stopped." , micromouseContext: "The robot has finished its runs and stops motors to save battery, waiting to be retrieved by the handler." }
     ],
     analogy: "A delivery driver: Loading (Mapping), Driving (Speed Run), Returning (Back to Start)."
   },
   { title: "States: Lee's Algorithm", subtitle: "Sub-states during mapping", icon: Hash, layout: "flow",
     data:[
-      { step: "Start Square", desc: "Initialise numbers." },
-      { step: "Follow Numbers", desc: "Move to lower values." },
-      { step: "Re-map", desc: "New wall found! Recalculate all numbers." },
-      { step: "Target Found", desc: "Exploration finished." }
+      { step: "Start Square", desc: "Initialise numbers." , micromouseContext: "The target cell(s) in the center of the maze are assigned a value of 0." },
+      { step: "Follow Numbers", desc: "Move to lower values." , micromouseContext: "The micromouse navigates by always moving to an adjacent cell with a flood-fill value exactly one less than its current cell." },
+      { step: "Re-map", desc: "New wall found! Recalculate all numbers." , micromouseContext: "When the micromouse discovers a wall that blocks its planned path, it must stop and recalculate the flood-fill values for the entire maze." },
+      { step: "Target Found", desc: "Exploration finished." , micromouseContext: "The micromouse has reached the center of the maze (usually a 2x2 area in the middle of the 16x16 or 8x8 grid)." }
     ],
     gotcha: "Re-mapping is critical. The initial map is empty; discovering a wall invalidates the current path."
   },
   { title: "States: Navigation Task", subtitle: "Movement execution", icon: Compass, layout: "bento",
     data:[
-      { title: "Travelling Forward", desc: "Superstate containing: Not Turning, About to Turn, About to Stop, Steer Correction.", color: "blue" },
-      { title: "Turning", desc: "Executing Left, Right, or U-Turn actions.", color: "emerald" },
-      { title: "Stopped", desc: "Halted at cell centre.", color: "rose" }
+      { title: "Travelling Forward", desc: "Superstate containing: Not Turning, About to Turn, About to Stop, Steer Correction.", color: "blue" , micromouseContext: "The robot must maintain a straight line within the 168mm wide corridor, using its side sensors to correct any drift." },
+      { title: "Turning", desc: "Executing Left, Right, or U-Turn actions.", color: "emerald" , micromouseContext: "The robot must execute precise 90 or 180-degree pivot turns to navigate corners without hitting the walls." },
+      { title: "Stopped", desc: "Halted at cell centre.", color: "rose" , micromouseContext: "The robot must come to a complete halt exactly in the center of a cell before deciding its next move or updating its map." }
     ],
     analogy: "A pilot: Cruising (Forward), Banking (Turning), Landing (Stopped)."
   },
@@ -737,9 +737,9 @@ const MASTER_SLIDES: any[] = [
   },
   { title: "Steering Correction States", subtitle: "Differential drive tuning", icon: Crosshair, layout: "bento",
     data:[
-      { title: "No Correction", desc: "Centred. Both motors step at equal speed." },
-      { title: "Steer Left", desc: "Drifted too far right. Left motor slows down to correct." },
-      { title: "Steer Right", desc: "Drifted too far left. Right motor slows down to correct." }
+      { title: "No Correction", desc: "Centred. Both motors step at equal speed." , micromouseContext: "The robot is perfectly centered in the corridor, so both stepper motors receive pulses at the exact same rate." },
+      { title: "Steer Left", desc: "Drifted too far right. Left motor slows down to correct." , micromouseContext: "The right sensor detects the wall is getting too close, so the left motor is slowed down slightly to angle the robot away from the right wall." },
+      { title: "Steer Right", desc: "Drifted too far left. Right motor slows down to correct." , micromouseContext: "The left sensor detects the wall is getting too close, so the right motor is slowed down slightly to angle the robot away from the left wall." }
     ],
     analogy: "Like walking down a narrow hallway; if you get too close to the right wall, you lean left to re-centre."
   },
@@ -803,9 +803,9 @@ const MASTER_SLIDES: any[] = [
   },
   { title: "Bitwise Masking", subtitle: "Fast Pattern Categorisation", icon: Hash, layout: "bento",
     data:[
-      { title: "The Concept", desc: "Use Bitwise AND (&) to instantly check if a group of sensors are all clear." },
-      { title: "Left Turn Mask: 0x70", desc: "0b01110000 isolates bits 6, 5, 4 (LL, LC, LR). If (pattern & 0x70) == 0, left side is completely open." },
-      { title: "Right Turn Mask: 0x07", desc: "0b00000111 isolates bits 2, 1, 0. If (pattern & 0x07) == 0, right side is open." }
+      { title: "The Concept", desc: "Use Bitwise AND (&) to instantly check if a group of sensors are all clear." , micromouseContext: "Bitwise operations are used extensively in micromouse programming because they execute in a single clock cycle, which is crucial for the fast-paced interrupt service routines." },
+      { title: "Left Turn Mask: 0x70", desc: "0b01110000 isolates bits 6, 5, 4 (LL, LC, LR). If (pattern & 0x70) == 0, left side is completely open." , micromouseContext: "By masking the sensor byte, the robot can instantly determine if the entire left side is clear of walls, allowing for a left turn." },
+      { title: "Right Turn Mask: 0x07", desc: "0b00000111 isolates bits 2, 1, 0. If (pattern & 0x07) == 0, right side is open." , micromouseContext: "By masking the sensor byte, the robot can instantly determine if the entire right side is clear of walls, allowing for a right turn." }
     ],
     analogy: "Like placing a cardboard stencil over a page; it hides everything except the specific letters you want to check."
   },
@@ -1036,18 +1036,18 @@ Result: 1 (Wall present)`,
   // SECTION 10: HARDWARE
   { title: "Hardware Stack", subtitle: "From MCU to Motor", icon: Layers, layout: "flow",
     data:[
-      { step: "MBED (MCU)", desc: "Outputs logic CLK and CW/CCW signals (5V, very low current)." },
-      { step: "L297 IC", desc: "Stepper controller. Generates complex 4-phase sequence." },
-      { step: "DS2003 IC", desc: "Darlington array. Amplifies current to drive motor coils." },
-      { step: "Motor", desc: "Bipolar (4-wire) for torque, or Unipolar (6-wire) for simplicity." }
+      { step: "MBED (MCU)", desc: "Outputs logic CLK and CW/CCW signals (5V, very low current)." , micromouseContext: "The brain of the micromouse, responsible for reading sensors, running the maze-solving algorithm, and generating the precise timing signals for the motors." },
+      { step: "L297 IC", desc: "Stepper controller. Generates complex 4-phase sequence." , micromouseContext: "This chip takes the simple 'step' and 'direction' signals from the mbed and translates them into the complex sequence of coil activations needed to turn the stepper motor." },
+      { step: "DS2003 IC", desc: "Darlington array. Amplifies current to drive motor coils." , micromouseContext: "The mbed cannot provide enough current to drive the motors directly. The DS2003 acts as a high-current switch, controlled by the L297." },
+      { step: "Motor", desc: "Bipolar (4-wire) for torque, or Unipolar (6-wire) for simplicity." , micromouseContext: "Stepper motors are typically used in micromice because they allow for precise distance tracking (odometry) without needing complex external encoders." }
     ],
     analogy: "The Brain (MCU) tells the General (L297) the plan, who tells the Soldiers (DS2003) to move the heavy wheels (Motor)."
   },
   { title: "Back-EMF Protection", subtitle: "Flywheel Diodes", icon: ZapOff, layout: "bento",
     data:[
-      { title: "The Problem", desc: "Switching off motor coils creates massive high-voltage spikes (Back-EMF) that destroy transistors." },
-      { title: "The Solution", desc: "Internal Flywheel Diodes in the DS2003 clamp the spike." },
-      { title: "CRITICAL WIRING", desc: "The DS2003 'COM' pin MUST be connected to the 12V motor supply to give diodes a reference.", color: "rose" }
+      { title: "The Problem", desc: "Switching off motor coils creates massive high-voltage spikes (Back-EMF) that destroy transistors." , micromouseContext: "When the magnetic field in the motor coils collapses, it generates a high-voltage spike that can easily destroy the delicate transistors in the driver IC." },
+      { title: "The Solution", desc: "Internal Flywheel Diodes in the DS2003 clamp the spike." , micromouseContext: "The DS2003 contains built-in flyback diodes that provide a safe path for this high-voltage spike to dissipate." },
+      { title: "CRITICAL WIRING", desc: "The DS2003 'COM' pin MUST be connected to the 12V motor supply to give diodes a reference.", color: "rose" , micromouseContext: "If the COM pin is not connected to the motor supply voltage, the flyback diodes cannot function, and the DS2003 will be destroyed the first time the motors are turned off." }
     ],
     analogy: "Like a water hammer arrestor in plumbing that stops pipes from violently banging when a valve shuts suddenly."
   },
@@ -1079,8 +1079,8 @@ Result: 1 (Wall present)`,
   },
   { title: "Battery Safety", subtitle: "Series vs Parallel", icon: BatteryCharging, layout: "comparison",
     data: {
-      left: { title: "Series (SAFE)", desc: "Connect end-to-end. Voltages add up. Capacity stays the same. Highly recommended.", color: "emerald" },
-      right: { title: "Parallel (DANGEROUS)", desc: "Side-by-side. If voltages differ slightly, massive equalisation currents flow -> Fire/Explosion.", color: "rose" }
+      left: { title: "Series (SAFE)", desc: "Connect end-to-end. Voltages add up. Capacity stays the same. Highly recommended.", color: "emerald" , micromouseContext: "Micromice typically use 2S or 3S LiPo batteries in series to provide the 7.4V or 11.1V needed to drive the stepper motors effectively." },
+      right: { title: "Parallel (DANGEROUS)", desc: "Side-by-side. If voltages differ slightly, massive equalisation currents flow -> Fire/Explosion.", color: "rose" , micromouseContext: "Connecting LiPo cells in parallel without proper balancing circuitry is extremely dangerous and can lead to thermal runaway (fire)." }
     },
     analogy: "Series is like a team of horses pulling in a line. Parallel is like trying to force two horses of different strengths to run at the exact same speed side-by-side."
   },
@@ -1192,42 +1192,42 @@ int main() {
 const DEEP_DIVE_SLIDES: any[] = [
   { title: "Motor Physics & Control", subtitle: "Torque, Speed & PID", icon: Zap, layout: "bento",
     data: [
-      { title: "Trapezoidal Speed", desc: "Motors lose torque at high speeds. Ramp up (accelerate) and ramp down (decelerate) to prevent stalling.", color: "rose" },
-      { title: "PID Control", desc: "Proportional (steer based on error), Derivative (dampen oscillation), Integral (correct drift).", color: "blue" },
-      { title: "PID Equation", desc: "u(t) = K_p e(t) + K_i ∫ e(t)dt + K_d de(t)/dt", color: "emerald" },
-      { title: "Inertia", desc: "Robot mass resists velocity changes. High acceleration requires high torque.", color: "amber" }
+      { title: "Trapezoidal Speed", desc: "Motors lose torque at high speeds. Ramp up (accelerate) and ramp down (decelerate) to prevent stalling.", color: "rose" , micromouseContext: "To achieve high top speeds during the speed run, the micromouse must gradually accelerate and decelerate to avoid slipping or stalling the stepper motors." },
+      { title: "PID Control", desc: "Proportional (steer based on error), Derivative (dampen oscillation), Integral (correct drift).", color: "blue" , micromouseContext: "Used to keep the micromouse perfectly centered in the corridor. The 'error' is the difference between the left and right sensor readings." },
+      { title: "PID Equation", desc: "u(t) = K_p e(t) + K_i ∫ e(t)dt + K_d de(t)/dt", color: "emerald" , micromouseContext: "The microcontroller continuously calculates this equation to adjust the motor speeds based on the sensor error." },
+      { title: "Inertia", desc: "Robot mass resists velocity changes. High acceleration requires high torque.", color: "amber" , micromouseContext: "The physical weight of the micromouse limits how fast it can accelerate. Lighter mice can accelerate faster and navigate corners more quickly." }
     ]
   },
   { title: "Advanced Navigation", subtitle: "Odometry & Diagonal Paths", icon: MapPin, layout: "bento",
     data: [
-      { title: "Odometry", desc: "Track exact steps taken by each motor to estimate position (Δx, Δy, Δθ).", color: "indigo" },
-      { title: "Dead Reckoning Error", desc: "Wheel slip causes errors to accumulate. Reset position at known landmarks.", color: "rose" },
-      { title: "Diagonal Movement", desc: "Cut corners at 45° for shorter path and higher average speed.", color: "emerald" },
-      { title: "Diagonal Distance", desc: "d = √(x² + y²). Shorter than orthogonal x + y.", color: "blue" }
+      { title: "Odometry", desc: "Track exact steps taken by each motor to estimate position (Δx, Δy, Δθ).", color: "indigo" , micromouseContext: "By counting the number of steps sent to each motor, the micromouse can calculate exactly how far it has traveled and how much it has turned." },
+      { title: "Dead Reckoning Error", desc: "Wheel slip causes errors to accumulate. Reset position at known landmarks.", color: "rose" , micromouseContext: "If the wheels slip on dust or during a fast turn, the step count will no longer match the physical distance, causing the robot to crash." },
+      { title: "Diagonal Movement", desc: "Cut corners at 45° for shorter path and higher average speed.", color: "emerald" , micromouseContext: "Advanced micromice use diagonal paths during the speed run to shave seconds off their time, as the hypotenuse is shorter than the two sides." },
+      { title: "Diagonal Distance", desc: "d = √(x² + y²). Shorter than orthogonal x + y.", color: "blue" , micromouseContext: "Moving diagonally across a cell is approximately 1.414 times the length of moving straight, but it saves the time of making two 90-degree turns." }
     ]
   },
   { title: "Sensors & IMU", subtitle: "Calibration & Gyroscopes", icon: Compass, layout: "bento",
     data: [
-      { title: "Sensor Calibration", desc: "True Reflected IR = Light Reading (LED on) - Dark Reading (LED off). Removes ambient noise.", color: "amber" },
-      { title: "Gyroscope (IMU)", desc: "Measures angular velocity (yaw rate in deg/s).", color: "blue" },
-      { title: "Heading Integration", desc: "θ_new = θ_old + (ω * Δt). Integrate yaw rate to get exact heading.", color: "emerald" },
-      { title: "Gyro Drift", desc: "Gyros drift over time. Combine with wall sensors to correct heading.", color: "rose" }
+      { title: "Sensor Calibration", desc: "True Reflected IR = Light Reading (LED on) - Dark Reading (LED off). Removes ambient noise.", color: "amber" , micromouseContext: "Ambient light levels change depending on the room. The micromouse must calibrate its sensors by taking readings with the IR LEDs off and then on." },
+      { title: "Gyroscope (IMU)", desc: "Measures angular velocity (yaw rate in deg/s).", color: "blue" , micromouseContext: "Used to maintain a perfectly straight heading during the speed run and to execute precise 90-degree turns without relying solely on the walls." },
+      { title: "Heading Integration", desc: "θ_new = θ_old + (ω * Δt). Integrate yaw rate to get exact heading.", color: "emerald" , micromouseContext: "The microcontroller continuously adds up the tiny changes in angle reported by the gyro to keep track of the robot's overall absolute heading." },
+      { title: "Gyro Drift", desc: "Gyros drift over time. Combine with wall sensors to correct heading.", color: "rose" , micromouseContext: "Because the gyro's readings are integrated over time, any small measurement error accumulates, causing the calculated heading to slowly drift away from reality." }
     ]
   },
   { title: "Advanced Hardware", subtitle: "Power & Memory", icon: Battery, layout: "bento",
     data: [
-      { title: "Battery Voltage Drop", desc: "As battery drains, voltage drops. PWM duty cycle produces less actual power.", color: "rose" },
-      { title: "Voltage Compensation", desc: "PWM_adj = PWM_target * (V_nom / V_batt). Scale PWM to maintain constant power.", color: "emerald" },
-      { title: "Flash Memory", desc: "Store the Wall Map in EEPROM/Flash so it survives power cycles.", color: "indigo" },
-      { title: "Wear Leveling", desc: "Flash has limited write cycles. Only write when the maze is fully solved.", color: "slate" }
+      { title: "Battery Voltage Drop", desc: "As battery drains, voltage drops. PWM duty cycle produces less actual power.", color: "rose" , micromouseContext: "As the LiPo battery discharges during a run, the voltage drops, which means the motors will produce less torque if the PWM duty cycle is kept constant." },
+      { title: "Voltage Compensation", desc: "PWM_adj = PWM_target * (V_nom / V_batt). Scale PWM to maintain constant power.", color: "emerald" , micromouseContext: "The micromouse measures the battery voltage using an ADC pin and adjusts the motor PWM to ensure consistent performance from the start to the end of the run." },
+      { title: "Flash Memory", desc: "Store the Wall Map in EEPROM/Flash so it survives power cycles.", color: "indigo" , micromouseContext: "The micromouse must save its explored maze map to non-volatile memory so that if it is turned off or resets, it doesn't have to explore the maze again." },
+      { title: "Wear Leveling", desc: "Flash has limited write cycles. Only write when the maze is fully solved.", color: "slate" , micromouseContext: "Flash memory can only be written to a limited number of times. The micromouse should only save the map when it reaches the center or the start, not after every cell." }
     ]
   },
   { title: "Software Engineering", subtitle: "Architecture & Debugging", icon: Code, layout: "bento",
     data: [
-      { title: "Interrupt Priorities", desc: "High: Motor Step Timer (Ticker). Low: Sensor ADC, Serial Debug.", color: "rose" },
-      { title: "OOP Architecture", desc: "Encapsulate hardware details in classes (Motors, Sensors, Maze).", color: "blue" },
-      { title: "Telemetry", desc: "Stream sensor values over Bluetooth/Serial to graph data and tune PID.", color: "emerald" },
-      { title: "Visual Indicators", desc: "Use onboard LEDs to indicate current State or flash on wall detection.", color: "amber" }
+      { title: "Interrupt Priorities", desc: "High: Motor Step Timer (Ticker). Low: Sensor ADC, Serial Debug.", color: "rose" , micromouseContext: "The motor step timer must have the highest priority to ensure smooth movement. If a sensor read delays a motor step, the robot will jerk or stall." },
+      { title: "OOP Architecture", desc: "Encapsulate hardware details in classes (Motors, Sensors, Maze).", color: "blue" , micromouseContext: "Using C++ classes makes the micromouse code much easier to manage. You can have a 'Motor' class and a 'Sensor' class, keeping the main logic clean." },
+      { title: "Telemetry", desc: "Stream sensor values over Bluetooth/Serial to graph data and tune PID.", color: "emerald" , micromouseContext: "During development, the micromouse can send its sensor readings and map data to a laptop via Bluetooth so the programmer can see what the robot 'sees'." },
+      { title: "Visual Indicators", desc: "Use onboard LEDs to indicate current State or flash on wall detection.", color: "amber" , micromouseContext: "LEDs are crucial for debugging. The micromouse can use LEDs to indicate which state it is in (e.g., exploring, speed run) or if it has detected a wall." }
     ]
   },
   { title: "Battery Runtime", subtitle: "Capacity Calculations", icon: BatteryCharging, layout: "math",
@@ -1279,10 +1279,10 @@ echo_pin.rise(&echo_start_isr);`,
   },
   { title: "Left-Hand-on-Wall Algorithm", subtitle: "Rules & Limitations", icon: Map, layout: "bento",
     data: [
-      { title: "The Rule", desc: "Always keep your left hand on the wall. Turn left if possible, else go straight, else turn right, else U-turn.", color: "blue" },
-      { title: "The Guarantee", desc: "Will eventually find the exit OF a simply connected maze (no loops).", color: "emerald" },
-      { title: "The Limitation", desc: "Can get trapped in infinite loops if the maze has islands (disconnected walls).", color: "rose" },
-      { title: "Micro-Mouse Use", desc: "Used in Stage 2 for basic navigation testing, but replaced by Lee's Algorithm for Stage 3.", color: "slate" }
+      { title: "The Rule", desc: "Always keep your left hand on the wall. Turn left if possible, else go straight, else turn right, else U-turn.", color: "blue" , micromouseContext: "A simple algorithm that guarantees finding the exit of a maze, provided the maze has no loops (is simply connected)." },
+      { title: "The Guarantee", desc: "Will eventually find the exit OF a simply connected maze (no loops).", color: "emerald" , micromouseContext: "If the maze is simply connected, the left-hand rule will eventually explore every reachable corridor." },
+      { title: "The Limitation", desc: "Can get trapped in infinite loops if the maze has islands (disconnected walls).", color: "rose" , micromouseContext: "Competition micromouse mazes often contain loops or 'islands'. The left-hand rule will cause the robot to walk in circles endlessly around an island." },
+      { title: "Micro-Mouse Use", desc: "Used in Stage 2 for basic navigation testing, but replaced by Lee's Algorithm for Stage 3.", color: "slate" , micromouseContext: "Often used as a beginner's algorithm to test basic wall-following and turning logic before implementing the more complex flood-fill algorithm." }
     ]
   },
   { title: "Complete Task Breakdown", subtitle: "What needs to be done", icon: Target, layout: "split",
@@ -1293,9 +1293,9 @@ echo_pin.rise(&echo_start_isr);`,
   },
   { title: "Final Integration", subtitle: "Putting it all together", icon: Layers, layout: "bento",
     data: [
-      { title: "Subsystem Testing", desc: "Test motors, then sensors, then logic independently before combining.", color: "blue" },
-      { title: "Calibration", desc: "Tune sensor thresholds and motor speeds in the actual maze environment.", color: "amber" },
-      { title: "Robustness", desc: "Ensure battery is charged and wiring is secure to prevent mid-run failures.", color: "emerald" }
+      { title: "Subsystem Testing", desc: "Test motors, then sensors, then logic independently before combining.", color: "blue" , micromouseContext: "A micromouse is a complex system. Testing the motors, sensors, and logic separately makes it much easier to isolate and fix bugs." },
+      { title: "Calibration", desc: "Tune sensor thresholds and motor speeds in the actual maze environment.", color: "amber" , micromouseContext: "The IR sensors must be calibrated to the specific lighting conditions and wall reflectivity of the competition maze." },
+      { title: "Robustness", desc: "Ensure battery is charged and wiring is secure to prevent mid-run failures.", color: "emerald" , micromouseContext: "A micromouse must be physically robust to survive crashes and electrical noise without resetting or breaking." }
     ]
   }
 ];
@@ -1322,9 +1322,9 @@ if (state == FORWARD) {
   },
   { title: "The Problem — Slow Sequential Checking", subtitle: "Why if/else chains fail", icon: ShieldAlert, layout: "bento",
     data: [
-      { title: "Execution Time", desc: "Long if/else chains take variable amounts of time to execute depending on which condition is met.", color: "rose" },
-      { title: "Readability", desc: "Nested if/else statements become extremely difficult to read and debug.", color: "amber" },
-      { title: "Scalability", desc: "Adding new sensor combinations requires rewriting large chunks of logic.", color: "blue" }
+      { title: "Execution Time", desc: "Long if/else chains take variable amounts of time to execute depending on which condition is met.", color: "rose" , micromouseContext: "In a real-time system like a micromouse, variable execution time can cause the control loop to miss deadlines, leading to jerky movement or crashes." },
+      { title: "Readability", desc: "Nested if/else statements become extremely difficult to read and debug.", color: "amber" , micromouseContext: "Clean, readable code is essential when debugging complex maze-solving logic under the pressure of a competition." },
+      { title: "Scalability", desc: "Adding new sensor combinations requires rewriting large chunks of logic.", color: "blue" , micromouseContext: "As the micromouse gets more advanced (e.g., adding diagonal movement), the state machine and logic must be easy to expand without breaking existing features." }
     ],
     gotcha: "In an interrupt service routine (ISR), execution time must be short and deterministic. Long if/else chains violate this."
   },
@@ -1337,9 +1337,9 @@ if (state == FORWARD) {
   },
   { title: "Lee's Algorithm — Navigation & Recalculation", subtitle: "Adapting to new walls", icon: RotateCcw, layout: "bento",
     data: [
-      { title: "Navigation", desc: "Robot always moves to the adjacent cell with the lowest flood-fill number.", color: "emerald" },
-      { title: "Discovery", desc: "When a new wall is detected, it is added to the Wall Map.", color: "blue" },
-      { title: "Recalculation", desc: "The entire flood-fill process must be re-run from the target cell to update the numbers based on the new wall.", color: "rose" }
+      { title: "Navigation", desc: "Robot always moves to the adjacent cell with the lowest flood-fill number.", color: "emerald" , micromouseContext: "The robot uses the flood-fill values to determine the shortest path to the target, always moving 'downhill' towards 0." },
+      { title: "Discovery", desc: "When a new wall is detected, it is added to the Wall Map.", color: "blue" , micromouseContext: "As the robot explores, it updates its internal map with newly discovered walls, which may block its current planned path." },
+      { title: "Recalculation", desc: "The entire flood-fill process must be re-run from the target cell to update the numbers based on the new wall.", color: "rose" , micromouseContext: "When a new wall blocks the path, the robot must pause and recalculate the flood-fill values to find a new route to the target." }
     ],
     gotcha: "If you don't recalculate after finding a wall, the robot will try to drive through it!"
   },
@@ -1352,10 +1352,10 @@ if (state == FORWARD) {
   },
   { title: "Majority Vote — Worked Example", subtitle: "Filtering Noise", icon: CheckCircle, layout: "bento",
     data: [
-      { title: "Buffer", desc: "[1, 1, 0, 1, 1, 0, 1] (n=7 readings)", color: "slate" },
-      { title: "Count", desc: "Number of 1s = 5. Number of 0s = 2.", color: "blue" },
-      { title: "Threshold", desc: "n/2 = 7/2 = 3.5", color: "amber" },
-      { title: "Result", desc: "5 > 3.5, so the final filtered value is 1 (Wall detected).", color: "emerald" }
+      { title: "Buffer", desc: "[1, 1, 0, 1, 1, 0, 1] (n=7 readings)", color: "slate" , micromouseContext: "The robot takes multiple rapid readings of a sensor to filter out transient noise spikes caused by electrical interference or physical vibrations." },
+      { title: "Count", desc: "Number of 1s = 5. Number of 0s = 2.", color: "blue" , micromouseContext: "The robot counts how many times the sensor read '1' (wall detected) within the buffer." },
+      { title: "Threshold", desc: "n/2 = 7/2 = 3.5", color: "amber" , micromouseContext: "The robot compares the count to half the buffer size to determine the majority vote." },
+      { title: "Result", desc: "5 > 3.5, so the final filtered value is 1 (Wall detected).", color: "emerald" , micromouseContext: "The majority vote is used as the final, filtered sensor reading, providing a much more reliable indication of whether a wall is actually present." }
     ],
     gotcha: "Always use an odd number for 'n' to prevent ties (e.g., 3 vs 3 in a buffer of 6)."
   },
@@ -1414,24 +1414,24 @@ if (state == FORWARD) {
   },
   { title: "Unipolar vs Bipolar Stepper Motors", subtitle: "Wiring & Control", icon: Zap, layout: "comparison",
     data: {
-      left: { title: "Unipolar (6-wire)", desc: "Current flows in one direction. Easier to control (simple transistors). Lower torque for same size.", color: "blue" },
-      right: { title: "Bipolar (4-wire)", desc: "Current reverses direction. Requires complex H-bridge. Higher torque for same size.", color: "emerald" }
+      left: { title: "Unipolar (6-wire)", desc: "Current flows in one direction. Easier to control (simple transistors). Lower torque for same size.", color: "blue" , micromouseContext: "Often used in beginner micromice because they are easier to drive, but they provide less torque for their size compared to bipolar motors." },
+      right: { title: "Bipolar (4-wire)", desc: "Current reverses direction. Requires complex H-bridge. Higher torque for same size.", color: "emerald" , micromouseContext: "The standard choice for competitive micromice due to their higher torque-to-weight ratio, allowing for faster acceleration." }
     },
     gotcha: "Micro-mouse typically uses Bipolar motors for maximum torque-to-weight ratio, requiring the L297/L298 or similar driver."
   },
   { title: "The L297 Stepper Motor Controller", subtitle: "The 'Brain' of the Motor", icon: Cpu, layout: "bento",
     data: [
-      { title: "Purpose", desc: "Translates simple step/direction signals from MCU into complex 4-phase coil sequences.", color: "blue" },
-      { title: "Inputs", desc: "CLK (Step), CW/CCW (Direction), ENABLE.", color: "emerald" },
-      { title: "Outputs", desc: "A, B, C, D phase signals to drive the Darlington array or H-bridge.", color: "indigo" }
+      { title: "Purpose", desc: "Translates simple step/direction signals from MCU into complex 4-phase coil sequences.", color: "blue" , micromouseContext: "The L297 simplifies the software by handling the complex coil sequencing, allowing the microcontroller to just send 'step' and 'direction' pulses." },
+      { title: "Inputs", desc: "CLK (Step), CW/CCW (Direction), ENABLE.", color: "emerald" , micromouseContext: "The microcontroller controls the L297 using these simple logic-level signals." },
+      { title: "Outputs", desc: "A, B, C, D phase signals to drive the Darlington array or H-bridge.", color: "indigo" , micromouseContext: "The L297 generates the specific sequence of high/low signals needed to energize the motor coils in the correct order." }
     ],
     analogy: "Like a translator converting simple commands ('Walk Forward') into complex muscle movements."
   },
   { title: "The DS2003 Darlington Driver", subtitle: "The 'Muscle' of the Motor", icon: Zap, layout: "bento",
     data: [
-      { title: "Purpose", desc: "Amplifies the weak logic signals from the L297 to handle the high current required by motor coils.", color: "rose" },
-      { title: "Mechanism", desc: "Uses pairs of transistors (Darlington pairs) for massive current gain.", color: "amber" },
-      { title: "Limitation", desc: "Only sinks current (pulls to ground). Suitable for Unipolar motors or specific Bipolar setups.", color: "slate" }
+      { title: "Purpose", desc: "Amplifies the weak logic signals from the L297 to handle the high current required by motor coils.", color: "rose" , micromouseContext: "The L297 simplifies the software by handling the complex coil sequencing, allowing the microcontroller to just send 'step' and 'direction' pulses." },
+      { title: "Mechanism", desc: "Uses pairs of transistors (Darlington pairs) for massive current gain.", color: "amber" , micromouseContext: "Darlington transistors provide the high current gain necessary to switch the large currents required by the stepper motor coils." },
+      { title: "Limitation", desc: "Only sinks current (pulls to ground). Suitable for Unipolar motors or specific Bipolar setups.", color: "slate" , micromouseContext: "Because it can only sink current, the DS2003 is typically used with unipolar stepper motors, where the center tap is tied to the positive supply." }
     ],
     gotcha: "Do not forget the COM pin connection for the internal flywheel diodes!"
   },
@@ -1493,10 +1493,10 @@ if (state == FORWARD) {
   },
   { title: "Practice Questions", subtitle: "Test your knowledge", icon: Award, layout: "bento",
     data: [
-      { title: "Q1: Nyquist", desc: "If d_step is 2mm and wall width is 20mm, what is the maximum safe value for 'm'?", color: "blue" },
-      { title: "Q2: Heat", desc: "Calculate T_j for a 9V battery, 5V regulator, 0.4A current, and R_th of 50°C/W. Is a heatsink needed?", color: "rose" },
-      { title: "Q3: Stepping", desc: "How many steps to travel 180mm with a 40mm wheel and 400 steps/rev motor?", color: "emerald" },
-      { title: "Q4: Bitwise", desc: "What is the result of (0b10110111 & 0x70)? Is the left side clear?", color: "indigo" }
+      { title: "Q1: Nyquist", desc: "If d_step is 2mm and wall width is 20mm, what is the maximum safe value for 'm'?", color: "blue" , micromouseContext: "A classic exam question testing the understanding of spatial sampling and how to calculate the 'm' multiplier for the sensor interrupt." },
+      { title: "Q2: Heat", desc: "Calculate T_j for a 9V battery, 5V regulator, 0.4A current, and R_th of 50°C/W. Is a heatsink needed?", color: "rose" , micromouseContext: "Tests the ability to calculate power dissipation and thermal resistance to determine if a voltage regulator will overheat." },
+      { title: "Q3: Stepping", desc: "How many steps to travel 180mm with a 40mm wheel and 400 steps/rev motor?", color: "emerald" , micromouseContext: "Tests the understanding of odometry and how to convert physical distance into motor steps." },
+      { title: "Q4: Bitwise", desc: "What is the result of (0b10110111 & 0x70)? Is the left side clear?", color: "indigo" , micromouseContext: "Tests the ability to perform bitwise operations, which are essential for fast sensor pattern matching in the micromouse code." }
     ]
   }
 ];
@@ -1703,17 +1703,6 @@ function MicroMouseRevisionDeckInner() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [nextSlide, prevSlide]);
 
-  // Touch Swipe
-  const [touchStart, setTouchStart] = useState(null);
-  const handleTouchStart = (e) => setTouchStart(e.touches[0].clientX);
-  const handleTouchEnd = (e) => {
-    if (!touchStart) return;
-    const diff = touchStart - e.changedTouches[0].clientX;
-    if (diff > 50) nextSlide();
-    if (diff < -50) prevSlide();
-    setTouchStart(null);
-  };
-
   const slide = EXPANDED_SLIDES[currentSlide];
   const SlideIcon = slide.icon || Cpu;
 
@@ -1744,8 +1733,6 @@ function MicroMouseRevisionDeckInner() {
   return (
     <div 
       className="app-container overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans select-none flex flex-col text-base sm:text-lg pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
     >
       <NavigationDropdown 
         isOpen={isNavOpen} 
@@ -1782,29 +1769,29 @@ function MicroMouseRevisionDeckInner() {
         
         {/* Header Container */}
         <div className="w-full max-w-6xl mx-auto p-2 sm:p-4 pb-0 shrink-0 z-10">
-          <header className="flex items-center justify-between bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 p-3 rounded-2xl shadow-sm mb-4">
-            <div className="flex items-center gap-3">
+          <header className="flex items-center justify-between bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 p-3 rounded-2xl shadow-sm mb-4 gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <button 
                 onClick={() => setIsNavOpen(true)}
-                className="p-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-800/50 transition-colors"
+                className="p-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-800/50 transition-colors shrink-0"
                 aria-label="Open Navigation"
               >
                 <Menu size={20} />
               </button>
-              <div className="hidden sm:block p-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg">
+              <div className="hidden sm:block p-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg shrink-0">
                 <SlideIcon size={20} />
               </div>
-              <div>
-                <h1 className="font-bold text-sm sm:text-base leading-tight">{slide.title}</h1>
-                {slide.subtitle && <h2 className="text-[10px] sm:text-xs text-slate-500 font-medium">{slide.subtitle}</h2>}
+              <div className="min-w-0 truncate">
+                <h1 className="font-bold text-sm sm:text-base leading-tight truncate">{slide.title}</h1>
+                {slide.subtitle && <h2 className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">{slide.subtitle}</h2>}
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               <ThemeToggle />
-              <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
+              <span className="hidden sm:inline-block text-[10px] font-mono font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
                 {currentSlide + 1} / {totalSlides}
               </span>
-              <div className="flex gap-1">
+              <div className="flex gap-1 shrink-0">
                 <button 
                   onClick={prevSlide} 
                   disabled={currentSlide === 0} 
@@ -1842,9 +1829,10 @@ function MicroMouseRevisionDeckInner() {
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.2}
               onDragEnd={(e, info) => {
-                const threshold = window.innerWidth * 0.75;
-                if (info.offset.x > threshold && currentSlide > 0) prevSlide();
-                else if (info.offset.x < -threshold && currentSlide < totalSlides - 1) nextSlide();
+                const threshold = window.innerWidth * 0.15;
+                const velocityThreshold = 400;
+                if ((info.offset.x > threshold || info.velocity.x > velocityThreshold) && currentSlide > 0) prevSlide();
+                else if ((info.offset.x < -threshold || info.velocity.x < -velocityThreshold) && currentSlide < totalSlides - 1) nextSlide();
               }}
             >
               <div className="flex-1 flex flex-col w-full max-w-6xl mx-auto p-2 sm:p-4 pb-8">
